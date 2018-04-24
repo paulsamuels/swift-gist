@@ -46,6 +46,20 @@ describe '#run' do
     spm_package_creator_mock = Minitest::Mock.new
     spm_package_creator_mock.expect :call, "Package Stuff\n", [ swift_modules ]
 
+    # 7 - Start watching
+    chdir_mock.expect(:call, true) { |dir, &block|
+      block.call
+      assert_equal '/tmp/dir', dir
+    }
+    watcher_mock = Minitest::Mock.new
+    watcher_mock.expect :call, nil do |swift_modules_arg, &block|
+      block.call
+      assert_equal swift_modules, swift_modules_arg
+    end
+
+    system_mock = Minitest::Mock.new
+    system_mock.expect :call, true, [ 'swift test' ]
+
     assert_equal 0, Swift::Gist::run(
       %w[--module MyApp],
       cli: cli_mock,
@@ -54,7 +68,9 @@ describe '#run' do
       chdir: chdir_mock,
       spm_package_creator: spm_package_creator_mock,
       spm_project_creator: spm_project_creator_mock,
+      system: system_mock,
       open: open_mock,
+      watcher: watcher_mock
     )
 
     assert_mock cli_mock
@@ -64,5 +80,7 @@ describe '#run' do
     assert_mock spm_package_creator_mock
     assert_mock spm_project_creator_mock
     assert_mock open_mock
+    assert_mock watcher_mock
+    assert_mock system_mock
   end
 end

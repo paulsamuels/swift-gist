@@ -17,7 +17,9 @@ module Swift
       pwd: Dir.method(:pwd),
       spm_package_creator: method(:spm_package_definition_from_swift_modules),
       spm_project_creator: method(:spm_project_from_swift_modules),
-      stdout: $stdout
+      system: method(:system),
+      stdout: $stdout,
+      watcher: method(:watch_sources)
     )
 
       swift_modules = cli.call arguments
@@ -29,6 +31,12 @@ module Swift
 
           open.call('Package.swift', 'w') do |file|
             file.puts spm_package_creator.call(swift_modules)
+          end
+        end
+
+        watcher.call(swift_modules) do
+          chdir.call(tmp_dir) do
+            system.call('swift test')
           end
         end
       end
