@@ -4,7 +4,7 @@ A tool to reduce feedback cycles when doing TDD with Swift.
 
 TDD for iOS can be extremely painful as the feedback cycle (time from save to test results) is just too slow. The slow downs come from things like building lots of source code, code signing and simulator startup.
 
-This tool can help in certain cases to get feedback cycles to acceptable levels. The basic idea is that you manually (sounds painful but it's not too bad) pick the files you want to build and test, the fewer the better. Run `swift-gist` and it will create an SPM project in a tmp directory that links to just the files you specify and then starts [watchman](https://facebook.github.io/watchman/) to watch these files and run tests whenever a file is saved. The heavy lifting is picked up by SPM so this means you cannot specify files that `import UIKit`. It's also advisable to keep dependencies to a minimum (which I guess is just normally good advice).
+This tool can help in certain cases to get feedback cycles to acceptable levels. The basic idea is that you manually (sounds painful but it's not too bad) pick the files you want to build and test, the fewer the better. Run `swift-gist` and it will create an SPM project in a tmp directory that links to just the files you specify and then starts to watch these files and run tests whenever a file is saved. The heavy lifting is picked up by SPM so this means you cannot specify files that `import UIKit`. It's also advisable to keep dependencies to a minimum (which I guess is just normally good advice).
 
 ---
 
