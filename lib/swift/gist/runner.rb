@@ -14,6 +14,7 @@ module Swift
       chdir: Dir.method(:chdir),
       cli: method(:parse_command_line_arguments),
       formatted_date: -> { Time.iso8601(Time.now.iso8601) },
+      project_art_generator: method(:generate_project_art),
       project_generator: method(:generate_project),
       rm_rf: FileUtils.method(:rm_rf),
       system: method(:system),
@@ -23,6 +24,7 @@ module Swift
 
       swift_modules = cli.call arguments
       tmp_dir = project_generator.call(swift_modules)
+      stdout.call project_art_generator.call(swift_modules, tmp_dir)
 
       counter = 1
       watcher.call(swift_modules) do

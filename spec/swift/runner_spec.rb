@@ -5,6 +5,8 @@ describe '#run' do
   it 'orchestrates all the functions into a meaningful flow' do
     swift_modules = [ Swift::Gist::SwiftModule.new('MyApp', :src, []) ]
 
+    stdout_mock = Minitest::Mock.new
+
     # 1 - Parses command line arguments
     cli_mock = Minitest::Mock.new
     cli_mock.expect :call, swift_modules, [ %w[--module MyApp] ]
@@ -12,6 +14,10 @@ describe '#run' do
     # 2 - It generates the SPM project
     project_generator_mock = Minitest::Mock.new
     project_generator_mock.expect :call, '/tmp/dir', [ swift_modules ]
+
+    project_art_generator_mock = Minitest::Mock.new
+    project_art_generator_mock.expect :call, 'SOME ART', [ swift_modules, '/tmp/dir' ]
+    stdout_mock.expect :call, nil, [ 'SOME ART' ]
 
     # 3 - Start watching
     chdir_mock = Minitest::Mock.new
@@ -28,7 +34,6 @@ describe '#run' do
     formatted_date_mock = Minitest::Mock.new
     formatted_date_mock.expect :call, '2018-04-24 21:53:47 UTC'
 
-    stdout_mock = Minitest::Mock.new
     stdout_mock.expect :call, nil, [ "\n\n-----> Running `$ swift test` @ '2018-04-24 21:53:47 UTC' - Build #1"]
 
     system_mock = Minitest::Mock.new
@@ -43,6 +48,7 @@ describe '#run' do
       chdir: chdir_mock,
       cli: cli_mock,
       formatted_date: formatted_date_mock,
+      project_art_generator: project_art_generator_mock,
       project_generator: project_generator_mock,
       rm_rf: rm_rf_mock,
       stdout: stdout_mock,
@@ -50,14 +56,14 @@ describe '#run' do
       watcher: watcher_mock
     )
 
-    assert_mock cli_mock
     assert_mock chdir_mock
-    assert_mock watcher_mock
-    assert_mock system_mock
-    assert_mock stdout_mock
+    assert_mock cli_mock
     assert_mock formatted_date_mock
+    assert_mock project_art_generator_mock
     assert_mock project_generator_mock
     assert_mock rm_rf_mock
-
+    assert_mock stdout_mock
+    assert_mock system_mock
+    assert_mock watcher_mock
   end
 end

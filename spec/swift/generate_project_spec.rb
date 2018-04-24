@@ -10,7 +10,7 @@ describe '#generate_project' do
     # 1 - Creates tmp dir to create project in
     mktmpdir_mock = Minitest::Mock.new
     mktmpdir_mock.expect(:call, '/tmp/dir')
-    
+
     # 2 - It creates the project structure
     spm_project_creator_mock = Minitest::Mock.new
     spm_project_creator_mock.expect :call, nil, [ swift_modules, tmp_dir: '/tmp/dir' ]
