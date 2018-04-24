@@ -19,8 +19,16 @@ describe '#run' do
     project_art_generator_mock.expect :call, 'SOME ART', [ swift_modules, '/tmp/dir' ]
     stdout_mock.expect :call, nil, [ 'SOME ART' ]
 
-    # 3 - Start watching
+    # 3 - Pre heats the build caches
     chdir_mock = Minitest::Mock.new
+    chdir_mock.expect(:call, true) { |dir, &block|
+      block.call
+      assert_equal '/tmp/dir', dir
+    }
+    system_mock = Minitest::Mock.new
+    system_mock.expect :call, true, [ 'swift test' ]
+
+    # 4 - Start watching
     chdir_mock.expect(:call, true) { |dir, &block|
       block.call
       assert_equal '/tmp/dir', dir
@@ -36,7 +44,6 @@ describe '#run' do
 
     stdout_mock.expect :call, nil, [ "\n\n-----> Running `$ swift test` @ '2018-04-24 21:53:47 UTC' - Build #1"]
 
-    system_mock = Minitest::Mock.new
     system_mock.expect :call, true, [ 'swift test' ]
 
     # 4 - It tidies up after itself

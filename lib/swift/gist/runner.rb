@@ -26,6 +26,10 @@ module Swift
       tmp_dir = project_generator.call(swift_modules)
       stdout.call project_art_generator.call(swift_modules, tmp_dir)
 
+      chdir.call(tmp_dir) do
+        system.call('swift test')
+      end
+
       counter = 1
       watcher.call(swift_modules) do
         stdout.call "\n\n-----> Running `$ swift test` @ '#{formatted_date.call}' - Build ##{counter}"
