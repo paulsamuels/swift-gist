@@ -57,19 +57,27 @@ describe '#run' do
       assert_equal swift_modules, swift_modules_arg
     end
 
+    formatted_date_mock = Minitest::Mock.new
+    formatted_date_mock.expect :call, '2018-04-24 21:53:47 UTC'
+
+    stdout_mock = Minitest::Mock.new
+    stdout_mock.expect :call, nil, [ "\n\n-----> Running `$ swift test` @ '2018-04-24 21:53:47 UTC' - Build #1"]
+
     system_mock = Minitest::Mock.new
     system_mock.expect :call, true, [ 'swift test' ]
 
     assert_equal 0, Swift::Gist::run(
       %w[--module MyApp],
-      cli: cli_mock,
-      pwd: pwd_mock,
-      mktmpdir: mktmpdir_mock,
       chdir: chdir_mock,
+      cli: cli_mock,
+      formatted_date: formatted_date_mock,
+      mktmpdir: mktmpdir_mock,
+      open: open_mock,
+      pwd: pwd_mock,
       spm_package_creator: spm_package_creator_mock,
       spm_project_creator: spm_project_creator_mock,
+      stdout: stdout_mock,
       system: system_mock,
-      open: open_mock,
       watcher: watcher_mock
     )
 
@@ -82,5 +90,7 @@ describe '#run' do
     assert_mock open_mock
     assert_mock watcher_mock
     assert_mock system_mock
+    assert_mock stdout_mock
+    assert_mock formatted_date_mock
   end
 end

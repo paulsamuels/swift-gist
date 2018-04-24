@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'time'
 require 'tmpdir'
 
 module Swift
@@ -12,13 +13,14 @@ module Swift
       arguments,
       chdir: Dir.method(:chdir),
       cli: method(:parse_command_line_arguments),
+      formatted_date: -> { Time.iso8601(Time.now.iso8601) },
       mktmpdir: Dir.method(:mktmpdir),
       open: File.method(:open),
       pwd: Dir.method(:pwd),
       spm_package_creator: method(:spm_package_definition_from_swift_modules),
       spm_project_creator: method(:spm_project_from_swift_modules),
       system: method(:system),
-      stdout: $stdout,
+      stdout: $stdout.method(:puts),
       watcher: method(:watch_sources)
     )
 
@@ -34,10 +36,14 @@ module Swift
           end
         end
 
+        counter = 1
         watcher.call(swift_modules) do
+          stdout.call "\n\n-----> Running `$ swift test` @ '#{formatted_date.call}' - Build ##{counter}"
           chdir.call(tmp_dir) do
             system.call('swift test')
           end
+
+          counter += 1
         end
       end
 
