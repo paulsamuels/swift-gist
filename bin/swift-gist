@@ -2,7 +2,6 @@
 
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
 
-require "bundler/setup"
 require "swift/gist"
 
 exit Swift::Gist::run(ARGV)
