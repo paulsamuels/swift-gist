@@ -17,8 +17,9 @@ module Swift
       project_art_generator: method(:generate_project_art),
       project_generator: method(:generate_project),
       rm_rf: FileUtils.method(:rm_rf),
-      system: method(:system),
+      stdin_watcher: method(:watch_stdin),
       stdout: $stdout.method(:puts),
+      system: method(:system),
       watcher: method(:watch_sources)
     )
 
@@ -31,14 +32,18 @@ module Swift
       end
 
       counter = 1
-      watcher.call(swift_modules) do
+
+      build_command = -> {
         stdout.call "\n\n-----> Running `$ swift test` @ '#{formatted_date.call}' - Build ##{counter}"
         chdir.call(tmp_dir) do
           system.call('swift test')
         end
 
         counter += 1
-      end
+      }
+
+      watcher.call(swift_modules, &build_command)
+      stdin_watcher.call(&build_command)
 
       0
 

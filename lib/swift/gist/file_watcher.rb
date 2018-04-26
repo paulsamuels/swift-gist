@@ -2,7 +2,7 @@ require 'listen'
 
 module Swift
   module Gist
-    def self.watch_sources swift_modules, listener: Listen, sleep: method(:sleep)
+    def self.watch_sources swift_modules, listener: Listen
       sources = Set.new(swift_modules.map { |swift_module| swift_module.sources }.flatten)
       dirs    = Set.new(sources.map { |path| Dir.exist?(path) ? path : File.dirname(path) })
 
@@ -10,8 +10,6 @@ module Swift
         next unless sources.intersect?(Set.new(modified + created + deleted))
         yield
       end.start
-
-      sleep.call
     end
   end
 end
