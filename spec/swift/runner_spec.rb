@@ -28,7 +28,7 @@ describe '#run' do
     system_mock = Minitest::Mock.new
     system_mock.expect :call, true, [ 'swift test' ]
 
-    # 4 - Start watching
+    # 4 - Start sources
     chdir_mock.expect(:call, true) { |dir, &block|
       block.call
       assert_equal '/tmp/dir', dir
@@ -39,6 +39,12 @@ describe '#run' do
       assert_equal swift_modules, swift_modules_arg
     end
 
+    # 5 - It starts watching std in
+    stdin_watcher_mock = Minitest::Mock.new
+    stdin_watcher_mock.expect :call, nil do |&block|
+      true
+    end
+
     formatted_date_mock = Minitest::Mock.new
     formatted_date_mock.expect :call, '2018-04-24 21:53:47 UTC'
 
@@ -46,7 +52,7 @@ describe '#run' do
 
     system_mock.expect :call, true, [ 'swift test' ]
 
-    # 4 - It tidies up after itself
+    # 6 - It tidies up after itself
     rm_rf_mock = Minitest::Mock.new
     rm_rf_mock.expect :call, nil, [ '/tmp/dir' ]
 
@@ -58,6 +64,7 @@ describe '#run' do
       project_art_generator: project_art_generator_mock,
       project_generator: project_generator_mock,
       rm_rf: rm_rf_mock,
+      stdin_watcher: stdin_watcher_mock,
       stdout: stdout_mock,
       system: system_mock,
       watcher: watcher_mock
@@ -69,6 +76,7 @@ describe '#run' do
     assert_mock project_art_generator_mock
     assert_mock project_generator_mock
     assert_mock rm_rf_mock
+    assert_mock stdin_watcher_mock
     assert_mock stdout_mock
     assert_mock system_mock
     assert_mock watcher_mock

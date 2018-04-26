@@ -17,33 +17,46 @@ module Swift
       project_art_generator: method(:generate_project_art),
       project_generator: method(:generate_project),
       rm_rf: FileUtils.method(:rm_rf),
-      system: method(:system),
+      stdin_watcher: method(:watch_stdin),
       stdout: $stdout.method(:puts),
+      system: method(:system),
       watcher: method(:watch_sources)
     )
 
-      swift_modules = cli.call arguments
-      tmp_dir = project_generator.call(swift_modules)
-      stdout.call project_art_generator.call(swift_modules, tmp_dir)
-
-      chdir.call(tmp_dir) do
-        system.call('swift test')
+      begin
+        swift_modules = cli.call arguments
+      rescue CLIError => error
+        puts error.reason
+        exit
       end
 
-      counter = 1
-      watcher.call(swift_modules) do
-        stdout.call "\n\n-----> Running `$ swift test` @ '#{formatted_date.call}' - Build ##{counter}"
+      begin
+        tmp_dir = project_generator.call(swift_modules)
+        stdout.call project_art_generator.call(swift_modules, tmp_dir)
+
         chdir.call(tmp_dir) do
           system.call('swift test')
         end
 
-        counter += 1
+        counter = 1
+
+        build_command = -> {
+          stdout.call "\n\n-----> Running `$ swift test` @ '#{formatted_date.call}' - Build ##{counter}"
+          chdir.call(tmp_dir) do
+            system.call('swift test')
+          end
+
+          counter += 1
+        }
+
+        watcher.call(swift_modules, &build_command)
+        stdin_watcher.call(&build_command)
+
+      ensure
+        rm_rf.call tmp_dir
       end
 
       0
-
-    ensure
-      rm_rf.call tmp_dir
     end
 
   end

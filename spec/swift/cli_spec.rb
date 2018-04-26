@@ -1,6 +1,49 @@
 require 'spec_helper'
 
 describe '#parse_command_line_arguments' do
+  it 'prints help if no arguments are provided' do
+    expected = <<EXPECTED
+Usage: swift-gist [--module[=<name>]] [--test-module[=<name>]]
+                  [--source[=<glob>]] [--depends-on[=<module name>]]
+EXPECTED
+
+    exception = assert_raises do
+      Swift::Gist::parse_command_line_arguments([])
+    end
+
+    assert_equal expected, exception.reason
+  end
+
+  it 'raises an error if --source is used before --test or --test-module' do
+    expected = "Error: The `--source` argument requires that a `--module` or `--test-module` has already been defined."
+
+    exception = assert_raises do
+      Swift::Gist::parse_command_line_arguments(%w[--source ''])
+    end
+
+    assert_equal expected, exception.reason
+  end
+
+  it 'raises an error if --depends-on is used before --test or --test-module' do
+    expected = "Error: The `--depends-on` argument requires that a `--module` or `--test-module` has already been defined."
+
+    exception = assert_raises do
+      Swift::Gist::parse_command_line_arguments(%w[--depends-on ''])
+    end
+
+    assert_equal expected, exception.reason
+  end
+
+  it 'raises an error if there are no valid sources' do
+    expected = "Error: The module 'MyApp' does not have any valid sources."
+
+    exception = assert_raises do
+      Swift::Gist::parse_command_line_arguments(%w[--module MyApp --source ''])
+    end
+
+    assert_equal expected, exception.reason
+  end
+
   it 'creates a swift module from a module name and some source globs' do
     result = Swift::Gist::parse_command_line_arguments(
       %w[--module MyApp --source Gemfile]
@@ -23,7 +66,7 @@ describe '#parse_command_line_arguments' do
 
   it 'add dependencies to the last module' do
     result = Swift::Gist::parse_command_line_arguments(
-      %w[--module MyApp --depends-on OtherModule]
+      %w[--module MyApp --source Gemfile --depends-on OtherModule]
     ).first
 
     assert_equal [ 'OtherModule' ], result.depends_on

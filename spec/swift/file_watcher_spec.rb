@@ -10,15 +10,11 @@ describe '#watch_sources' do
     end
     @listen_mock.expect :start, nil
 
-    @sleep_mock = Minitest::Mock.new
-    @sleep_mock.expect :call, nil
-
     @yield_count = 0
   end
 
   after do
     assert_mock @listen_mock
-    assert_mock @sleep_mock
   end
 
   it 'sets up a watcher on all passed sources' do
@@ -27,7 +23,7 @@ describe '#watch_sources' do
       Swift::Gist::SwiftModule.new('MyAppTests', :test, [ 'test/fileaTests.swift' ]),
     ]
 
-    Swift::Gist::watch_sources(swift_modules, listener: @listen_mock, sleep: @sleep_mock)
+    Swift::Gist::watch_sources(swift_modules, listener: @listen_mock)
   end
 
   it 'does not trigger for unknown paths' do
@@ -36,7 +32,7 @@ describe '#watch_sources' do
       Swift::Gist::SwiftModule.new('MyAppTests', :test, [ 'test/fileaTests.swift' ]),
     ]
 
-    Swift::Gist::watch_sources(swift_modules, listener: @listen_mock, sleep: @sleep_mock) do
+    Swift::Gist::watch_sources(swift_modules, listener: @listen_mock) do
       @yield_count += 1
     end
 
@@ -51,7 +47,7 @@ describe '#watch_sources' do
       Swift::Gist::SwiftModule.new('MyAppTests', :test, [ 'test/fileaTests.swift' ]),
     ]
 
-    Swift::Gist::watch_sources(swift_modules, listener: @listen_mock, sleep: @sleep_mock) do
+    Swift::Gist::watch_sources(swift_modules, listener: @listen_mock) do
       @yield_count += 1
     end
 
