@@ -4,4 +4,9 @@ $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
 
 require "swift/gist"
 
+trap "SIGINT" do
+  puts "Exiting"
+  exit
+end
+
 exit Swift::Gist::run(ARGV)
